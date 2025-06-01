@@ -1,7 +1,3 @@
-# Court Booker Scraper
-
-A Python automation tool for booking tennis courts through the CourtReserve system.
-
 ## Setup
 
 1. Create a virtual environment:
@@ -19,8 +15,6 @@ pip install -r requirements.txt
 
 Run the main script:
 ```bash
-python src/main.py
+python src/login.py
+python src/reserve.py
 ```
-
-## Note
-This tool is for personal use only. Please be mindful of the website's terms of service and rate limiting. 

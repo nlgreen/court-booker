@@ -1,15 +1,31 @@
 import requests
 from datetime import datetime, timedelta
 import json
+import os
+import sys
 
-allowed_day = "Saturday"
-request_verification_token = "UUN4-xY3oiZUlpuq4-0cp0MKbVecASIfukS7AOIUcUYXAIoxlS01RyJUNiwefGVLaX13Sj_X7EbFvvXBBUHlCAg4Aos1"
-request_data = "1O+9ggIWikEhVEyYdPkzCGbUvhhAEhDfbLpS47PKhFkUMJGoPEQubEix7OTMN2vLqvx4xDC6aRBJ7fNnl75QBzxC6NujDqwK02s3epI9iz4FLFtIrHuebXSwJkBozBnnmOwC9iKNggk="
+allowed_day = "Sunday"
 start_time = "20:00:00"
-# date = "5/31/2025 12:00:00 AM"
 duration = "90"
 
+def load_auth_data():
+    """Load auth data from auth.json. Exit if file doesn't exist."""
+    if not os.path.exists("auth.json"):
+        print("Error: auth.json not found. Please run login.py first to generate auth data.")
+        sys.exit(1)
+        
+    try:
+        with open("auth.json", "r") as f:
+            auth_data = json.load(f)
+            return auth_data["request_data"], auth_data["verification_token"]
+    except Exception as e:
+        print(f"Error reading auth.json: {str(e)}")
+        sys.exit(1)
+
 def run():
+    # Load auth data first
+    request_data, request_verification_token = load_auth_data()
+    
     current_date = datetime.now()
     day_of_week = current_date.strftime("%A")
     if day_of_week != allowed_day:
@@ -19,10 +35,10 @@ def run():
     desired_date = (current_date + timedelta(days=8)).strftime("%-m/%-d/%y") + " 12:00:00 AM"
     print("Attempting to book " + desired_date)
 
-    send_reservation_request(desired_date)
+    send_reservation_request(desired_date, request_data, request_verification_token)
 
 
-def send_reservation_request(date):
+def send_reservation_request(date, request_data, request_verification_token):
     url = "https://reservations.courtreserve.com//Online/ReservationsApi/CreateReservation/12465?uiCulture=en-US"
 
     headers = {

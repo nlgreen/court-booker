@@ -23,7 +23,6 @@ def setup_driver():
     return driver
 
 def login_to_courtreserve(driver, username, password):
-    """Log in to CourtReserve using provided credentials."""
     try:
         # Navigate to the login page
         driver.get('https://app.courtreserve.com/Online/Account/Login/12465?isMobileLayout=False')
@@ -32,8 +31,7 @@ def login_to_courtreserve(driver, username, password):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "UserNameOrEmail"))
         )
-        driver.save_screenshot("login_page.png")
-        print("Screenshot saved as 'login_page.png'")
+        # driver.save_screenshot("login_page.png")
 
         # Wait for the username field to be present and enter credentials
         username_field = WebDriverWait(driver, 10).until(
@@ -83,9 +81,18 @@ def login_to_courtreserve(driver, username, password):
         return True
     except Exception as e:
         print(f"An error occurred during login: {str(e)}")
+        # Delete auth.json if it exists
+        if os.path.exists("auth.json"):
+            os.remove("auth.json")
+            print("Cleaned up auth.json file after error")
         return False
 
 def main():
+    # Delete any existing auth.json at start
+    if os.path.exists("auth.json"):
+        os.remove("auth.json")
+        print("Cleaned up existing auth.json file")
+    
     # Load environment variables from .env file
     load_dotenv()
     
@@ -101,12 +108,7 @@ def main():
     driver = setup_driver()
     
     try:
-        # Attempt to log in
-        if login_to_courtreserve(driver, username, password):
-            print("Successfully logged in!")
-            # Add your booking logic here
-        else:
-            print("Failed to log in")
+        login_to_courtreserve(driver, username, password)
     finally:
         # Keep the browser open for now (remove this in production)
         input("Press Enter to close the browser...")
