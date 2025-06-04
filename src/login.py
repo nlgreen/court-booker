@@ -1,6 +1,8 @@
 import os
 import time
 import json
+from datetime import datetime, timedelta
+from urllib.parse import quote
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -22,7 +24,16 @@ def setup_driver():
     driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
 
+def get_next_saturday():
+    """Calculate the date of the next Saturday."""
+    today = datetime.now()
+    days_until_saturday = (5 - today.weekday()) % 7  # 5 is Saturday in weekday()
+    if days_until_saturday == 0:  # If today is Saturday, get next Saturday
+        days_until_saturday = 7
+    return today + timedelta(days=days_until_saturday)
+
 def login_to_courtreserve(driver, username, password):
+    """Log in to CourtReserve using provided credentials."""
     try:
         # Navigate to the login page
         driver.get('https://app.courtreserve.com/Online/Account/Login/12465?isMobileLayout=False')
@@ -47,9 +58,22 @@ def login_to_courtreserve(driver, username, password):
         login_button = driver.find_element(By.CSS_SELECTOR, "#loginForm button[type='button']")
         login_button.click()
         
-        # Wait for login to complete (you might want to adjust this based on what appears after login)
+        # Wait for login to complete
         time.sleep(3)
         
+        # Set the InternalCalendarDate cookie to next Saturday so that the calendar defaults to that. We need this because
+        # if you select a date that you already have a reservation it won't let you click for a new one. Saturday seems likely
+        # to not have one
+        target_date = get_next_saturday().strftime("%-m/%-d/%Y")
+        encoded_date = quote(target_date)
+        driver.add_cookie({
+            'name': 'InternalCalendarDate',
+            'value': encoded_date,
+            'domain': '.courtreserve.com'
+        })
+        print(f"Set InternalCalendarDate cookie to {target_date} (encoded: {encoded_date})")
+        
+        # Now navigate to the bookings page
         driver.get('https://app.courtreserve.com/Online/Reservations/Bookings/12465')
         time.sleep(3)
         
@@ -111,7 +135,7 @@ def main():
         login_to_courtreserve(driver, username, password)
     finally:
         # Keep the browser open for now (remove this in production)
-        input("Press Enter to close the browser...")
+        # input("Press Enter to close the browser...")
         driver.quit()
 
 if __name__ == "__main__":

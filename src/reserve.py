@@ -4,7 +4,7 @@ import json
 import os
 import sys
 
-allowed_day = "Sunday"
+allowed_day = "Wednesday"
 start_time = "20:00:00"
 duration = "90"
 
