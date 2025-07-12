@@ -12,6 +12,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
+def log(message):
+    """Print a message with a timestamp prefix."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}")
+
 def setup_driver():
     """Set up and return a configured Chrome WebDriver."""
     chrome_options = Options()
@@ -71,7 +76,7 @@ def login_to_courtreserve(driver, username, password):
             'value': encoded_date,
             'domain': '.courtreserve.com'
         })
-        print(f"Set InternalCalendarDate cookie to {target_date} (encoded: {encoded_date})")
+        log(f"Set InternalCalendarDate cookie to {target_date} (encoded: {encoded_date})")
         
         # Now navigate to the bookings page
         driver.get('https://app.courtreserve.com/Online/Reservations/Bookings/12465')
@@ -90,8 +95,8 @@ def login_to_courtreserve(driver, username, password):
         request_data = form.find_element(By.ID, "RequestData").get_attribute("value")
         verification_token = form.find_element(By.NAME, "__RequestVerificationToken").get_attribute("value")
         
-        print("RequestData:", request_data)
-        print("Verification Token:", verification_token)
+        log(f"RequestData: {request_data}")
+        log(f"Verification Token: {verification_token}")
         
         auth_data = {
             "request_data": request_data,
@@ -100,22 +105,22 @@ def login_to_courtreserve(driver, username, password):
         
         with open("auth.json", "w") as f:
             json.dump(auth_data, f, indent=4)
-        print("Auth data written to auth.json")
+        log("Auth data written to auth.json")
         
         return True
     except Exception as e:
-        print(f"An error occurred during login: {str(e)}")
+        log(f"An error occurred during login: {str(e)}")
         # Delete auth.json if it exists
         if os.path.exists("auth.json"):
             os.remove("auth.json")
-            print("Cleaned up auth.json file after error")
+            log("Cleaned up auth.json file after error")
         return False
 
 def main():
     # Delete any existing auth.json at start
     if os.path.exists("auth.json"):
         os.remove("auth.json")
-        print("Cleaned up existing auth.json file")
+        log("Cleaned up existing auth.json file")
     
     # Load environment variables from .env file
     load_dotenv()
@@ -125,7 +130,7 @@ def main():
     password = os.getenv('COURTRESERVE_PASSWORD')
     
     if not username or not password:
-        print("Error: Please set COURTRESERVE_USERNAME and COURTRESERVE_PASSWORD in your .env file")
+        log("Error: Please set COURTRESERVE_USERNAME and COURTRESERVE_PASSWORD in your .env file")
         return
     
     # Set up the driver

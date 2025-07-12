@@ -4,14 +4,19 @@ import json
 import os
 import sys
 
-allowed_day = "Wednesday"
+def log(message):
+    """Print a message with a timestamp prefix."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {message}")
+
+allowed_day = "None"
 start_time = "20:00:00"
 duration = "90"
 
 def load_auth_data():
     """Load auth data from auth.json. Exit if file doesn't exist."""
     if not os.path.exists("auth.json"):
-        print("Error: auth.json not found. Please run login.py first to generate auth data.")
+        log("Error: auth.json not found. Please run login.py first to generate auth data.")
         sys.exit(1)
         
     try:
@@ -19,7 +24,7 @@ def load_auth_data():
             auth_data = json.load(f)
             return auth_data["request_data"], auth_data["verification_token"]
     except Exception as e:
-        print(f"Error reading auth.json: {str(e)}")
+        log(f"Error reading auth.json: {str(e)}")
         sys.exit(1)
 
 def run():
@@ -29,11 +34,11 @@ def run():
     current_date = datetime.now()
     day_of_week = current_date.strftime("%A")
     if day_of_week != allowed_day:
-        print("Day is " + day_of_week + " but allowed day is " + allowed_day + ". Sleeping.")
+        log(f"Day is {day_of_week} but allowed day is {allowed_day}. Sleeping.")
         return
 
     desired_date = (current_date + timedelta(days=8)).strftime("%-m/%-d/%y") + " 12:00:00 AM"
-    print("Attempting to book " + desired_date)
+    log(f"Attempting to book {desired_date}")
 
     send_reservation_request(desired_date, request_data, request_verification_token)
 
@@ -121,12 +126,12 @@ def send_reservation_request(date, request_data, request_verification_token):
 
     response = requests.post(url, headers=headers, data=data)
 
-    print("Status Code:", response.status_code)
+    log(f"Status Code: {response.status_code}")
     data = json.loads(response.text)
     is_valid = data.get("isValid")
     if not is_valid:
-        print("Response Text:", response.text)
+        log(f"Response Text: {response.text}")
     else:
-        print("Success")
+        log("Success")
 
 run()
