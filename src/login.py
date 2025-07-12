@@ -40,27 +40,22 @@ def get_next_saturday():
 def login_to_courtreserve(driver, username, password):
     """Log in to CourtReserve using provided credentials."""
     try:
+        log("Starting reservation process...")
         # Navigate to the login page
         driver.get('https://app.courtreserve.com/Online/Account/Login/12465?isMobileLayout=False')
-        
-        # Wait for the page to load and take a screenshot
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "UserNameOrEmail"))
-        )
-        # driver.save_screenshot("login_page.png")
 
         # Wait for the username field to be present and enter credentials
         username_field = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "UserNameOrEmail"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="email"]'))
         )
         username_field.send_keys(username)
-        
+
         # Find and fill in the password field
-        password_field = driver.find_element(By.ID, "Password")
+        password_field = driver.find_element(By.CSS_SELECTOR, 'input[name="password"]')
         password_field.send_keys(password)
         
         # Find and click the login button
-        login_button = driver.find_element(By.CSS_SELECTOR, "#loginForm button[type='button']")
+        login_button = driver.find_element(By.XPATH, "//button[descendant::*[contains(text(), 'Continue')]]")
         login_button.click()
         
         # Wait for login to complete

@@ -9,7 +9,7 @@ def log(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] {message}")
 
-allowed_day = "None"
+allowed_day = "Monday"
 start_time = "20:00:00"
 duration = "90"
 
